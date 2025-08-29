@@ -6,4 +6,5 @@
 ### Developers
 | SNo. | Name | Email | Institute | ID |
 | :---: | :---: | :---: | :---: | :---: |
-| 2 | Siddhant Garg | siddhant.garg@research.iiit.ac.in | IIIT Hyderabad | - |
+| 1 | Siddhant Garg | siddhant.garg@research.iiit.ac.in | IIIT Hyderabad | - |
+| 2 | Sankalp Bhat | sankalp.b@research.iiit.ac.in | IIIT Hyderabad | - |
