@@ -1,5 +1,3 @@
-### Aim of the experiment
-
 To understand and analyze the directory-based cache coherence protocol through interactive simulation, exploring how distributed coherence mechanisms maintain data consistency in large-scale multiprocessor systems while achieving better scalability than traditional bus-based approaches.
 
 #### Learning Objectives

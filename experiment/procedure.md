@@ -1,10 +1,9 @@
-## Procedure
-
 Follow these step-by-step instructions to understand and explore Directory-Based Cache Coherence using the interactive simulator.
 
 ### Step 1: Understanding the Interface
 
 1. **Observe the Initial State**
+
    - Notice that all processor caches start in the **Invalid (I)** state
    - The directory shows all memory blocks in **Uncached (U)** state
    - All sharer vectors are empty (0000)
@@ -20,12 +19,14 @@ Follow these step-by-step instructions to understand and explore Directory-Based
 ### Step 2: Single Processor Read Operation
 
 1. **First Read Access**
+
    - Select **Processor 0** from the dropdown
    - Choose **Read** operation
    - Select memory address **Block A**
    - Click **"Execute Operation"**
 
 2. **Observe the Protocol Flow**
+
    - **Step 1**: P0 cache miss → Read-Request sent to Directory
    - **Step 2**: Directory (Uncached state) → Data-Reply sent to P0 with data from memory
    - **Step 3**: Directory updates: State = Shared, Sharer Vector = [1000], P0 cache = Shared
@@ -39,12 +40,14 @@ Follow these step-by-step instructions to understand and explore Directory-Based
 ### Step 3: Multiple Reader Sharing
 
 1. **Second Reader Access**
+
    - Select **Processor 1**
    - Choose **Read** operation
    - Select memory address **Block A** (same as Step 2)
    - Click **"Execute Operation"**
 
 2. **Analyze Sharing Behavior**
+
    - **Step 1**: P1 cache miss → Read-Request sent to Directory
    - **Step 2**: Directory (Shared state) → Data-Reply sent to P1 with data from memory
    - **Step 3**: Directory updates: Sharer Vector = [1100] (both P0 and P1)
@@ -58,6 +61,7 @@ Follow these step-by-step instructions to understand and explore Directory-Based
 ### Step 4: Write Operations and Invalidations
 
 1. **Write to Shared Data**
+
    - Select **Processor 1**
    - Choose **Write** operation
    - Select **Block A** (currently shared by P0, P1, P2)
@@ -65,6 +69,7 @@ Follow these step-by-step instructions to understand and explore Directory-Based
    - Click **"Execute Operation"**
 
 2. **Observe Invalidation Protocol**
+
    - **Step 1**: P1 cache miss → Write-Request sent to Directory
    - **Step 2**: Directory sends **Invalidate** messages to P0 and P2
    - **Step 3**: P0 and P2 acknowledge invalidations, cache lines become Invalid
@@ -79,12 +84,14 @@ Follow these step-by-step instructions to understand and explore Directory-Based
 ### Step 5: Owner-Based Data Forwarding
 
 1. **Read from Modified Data**
+
    - Select **Processor 3**
    - Choose **Read** operation
    - Select **Block A** (currently owned by P1)
    - Click **"Execute Operation"**
 
 2. **Observe Cache-to-Cache Transfer**
+
    - **Step 1**: P3 cache miss → Read-Request sent to Directory
    - **Step 2**: Directory identifies P1 as owner → Forward-Request sent to P1
    - **Step 3**: P1 sends **Data-Forward** directly to P3 AND **Writeback** to Directory
@@ -99,11 +106,13 @@ Follow these step-by-step instructions to understand and explore Directory-Based
 ### Step 6: Performance Analysis
 
 1. **Compare Access Patterns**
+
    - Try different sequences: all reads vs. mixed read/write
    - Observe message counts for different scenarios
    - Note cache hit rates after establishing sharing
 
 2. **Network Traffic Analysis**
+
    - **Read-only sharing**: Minimal ongoing traffic
    - **Producer-consumer**: Frequent ownership transfers
    - **Hot data**: High directory lookup activity
@@ -116,12 +125,14 @@ Follow these step-by-step instructions to understand and explore Directory-Based
 ### Step 7: Advanced Scenarios
 
 1. **Ownership Transfer Chain**
+
    - P0 writes to Block B → P0 becomes owner
    - P1 writes to Block B → Ownership transfers P0→P1
    - P2 writes to Block B → Ownership transfers P1→P2
    - Observe the forwarding chain and performance impact
 
 2. **Multiple Block Sharing**
+
    - Access different memory blocks (A, B, C, D) from different processors
    - Observe independent directory entries
    - Compare with shared blocks for traffic patterns
@@ -134,6 +145,7 @@ Follow these step-by-step instructions to understand and explore Directory-Based
 ### Step 8: Protocol Comparison
 
 1. **Directory vs. Bus-Based Analysis**
+
    - Simulate the same access pattern in both protocols (if available)
    - Compare total message counts
    - Analyze scalability implications
