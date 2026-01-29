@@ -1,0 +1,158 @@
+{
+  "version": 2.0,
+  "questions": [
+    {
+      "question": "After using the simulator, what did you observe when multiple processors read the same memory block?",
+      "answers": {
+        "a": "Only the first processor gets the data; others are blocked",
+        "b": "All processors receive data from memory and the directory state becomes Shared",
+        "c": "Each processor gets a different copy of the data",
+        "d": "The directory rejects additional read requests"
+      },
+      "explanations": {
+        "a": "Incorrect. Directory protocols allow multiple readers without blocking.",
+        "b": "Correct. Multiple processors can share read-only copies, with the directory tracking all sharers in the sharer vector.",
+        "c": "Incorrect. All processors receive the same data value for consistency.",
+        "d": "Incorrect. The directory facilitates sharing rather than rejecting requests."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "In the simulation, what visual indicator shows which processors currently share a memory block?",
+      "answers": {
+        "a": "The cache state changes to red color",
+        "b": "The directory's sharer vector bits are set to '1' for sharing processors",
+        "c": "The network visualization shows permanent connections",
+        "d": "The performance counters increment"
+      },
+      "explanations": {
+        "a": "Incorrect. Color coding indicates cache states, not sharing status.",
+        "b": "Correct. The sharer vector in the directory table shows which processors (0-3) currently have shared copies by displaying '1' for active sharers.",
+        "c": "Incorrect. Network connections show message flow, not current state.",
+        "d": "Incorrect. Performance counters track operations, not current sharing status."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "Based on your simulation experience, what happens to the message count when using cache-to-cache transfers versus memory access?",
+      "answers": {
+        "a": "Cache-to-cache transfers require more messages",
+        "b": "Both require the same number of messages",
+        "c": "Cache-to-cache transfers are more efficient and reduce overall network traffic",
+        "d": "Memory access is always faster"
+      },
+      "explanations": {
+        "a": "Incorrect. Cache-to-cache transfers are generally more efficient.",
+        "b": "Incorrect. The message patterns differ significantly.",
+        "c": "Correct. When reading from an exclusive owner, cache-to-cache transfer provides data directly from the owner processor, reducing latency and providing fresher data.",
+        "d": "Incorrect. Speed depends on the specific scenario and data location."
+      },
+      "correctAnswer": "c",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "During simulation, what did you observe about the directory state when a processor writes to a shared block?",
+      "answers": {
+        "a": "The directory state remains Shared",
+        "b": "The directory state becomes Uncached",
+        "c": "The directory state changes to Exclusive with the writer as the new owner",
+        "d": "The directory state becomes permanently locked"
+      },
+      "explanations": {
+        "a": "Incorrect. Write operations require exclusive access, changing the directory state.",
+        "b": "Incorrect. The block remains cached, just with exclusive ownership.",
+        "c": "Correct. The directory sends invalidations to all sharers, then transitions to Exclusive state with the writer as the owner.",
+        "d": "Incorrect. Directory states are dynamic and change based on access patterns."
+      },
+      "correctAnswer": "c",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What did you notice about network message patterns when comparing read-heavy vs. write-heavy workloads?",
+      "answers": {
+        "a": "Both workloads generate identical message patterns",
+        "b": "Read-heavy workloads generate fewer messages once sharing is established",
+        "c": "Write-heavy workloads require fewer directory lookups",
+        "d": "Network traffic is independent of workload characteristics"
+      },
+      "explanations": {
+        "a": "Incorrect. Read and write operations have very different message requirements.",
+        "b": "Correct. After initial sharing is established, subsequent reads to shared data generate cache hits with no network traffic, while writes always require invalidations.",
+        "c": "Incorrect. Writes typically require more complex protocol interactions.",
+        "d": "Incorrect. Workload characteristics significantly impact network traffic patterns."
+      },
+      "correctAnswer": "b",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "From your simulation observations, when does the directory become a potential bottleneck?",
+      "answers": {
+        "a": "When processors access different memory blocks",
+        "b": "When all processors repeatedly access the same popular memory block",
+        "c": "When the system is idle",
+        "d": "When processors only perform local computations"
+      },
+      "explanations": {
+        "a": "Incorrect. Accessing different blocks distributes directory load.",
+        "b": "Correct. When multiple processors frequently access the same memory block, all requests must go through the directory, creating a hotspot and potential bottleneck.",
+        "c": "Incorrect. Idle systems generate no directory traffic.",
+        "d": "Incorrect. Local computations don't involve directory operations."
+      },
+      "correctAnswer": "b",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "In the simulator, what performance metric best indicates the efficiency of the directory protocol?",
+      "answers": {
+        "a": "Total number of operations performed",
+        "b": "The ratio of cache hits to cache misses",
+        "c": "Number of processors in the system",
+        "d": "Amount of memory installed"
+      },
+      "explanations": {
+        "a": "Incorrect. Total operations indicate workload size, not efficiency.",
+        "b": "Correct. A higher cache hit ratio indicates better temporal locality and reduced directory/network overhead, showing protocol efficiency.",
+        "c": "Incorrect. Processor count is a system parameter, not a performance metric.",
+        "d": "Incorrect. Memory size doesn't directly measure protocol efficiency."
+      },
+      "correctAnswer": "b",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "After extensive simulation, which scenario would you expect to show the greatest scalability advantage of directory-based over bus-based protocols?",
+      "answers": {
+        "a": "Two processors sharing a single memory block",
+        "b": "Sixteen processors with mixed read/write patterns across multiple memory blocks",
+        "c": "One processor performing only local computations",
+        "d": "Four processors accessing completely disjoint memory regions"
+      },
+      "explanations": {
+        "a": "Incorrect. Small-scale systems don't highlight scalability advantages.",
+        "b": "Correct. With 16 processors and mixed access patterns, directory protocols avoid broadcast storms that would saturate a shared bus, while providing efficient point-to-point communication.",
+        "c": "Incorrect. Single processor scenarios don't test multiprocessor coherence.",
+        "d": "Incorrect. Disjoint access patterns don't stress coherence protocols significantly."
+      },
+      "correctAnswer": "b",
+      "difficulty": "advanced"
+    },
+    {
+      "question": "Based on your simulation analysis, what modification would most effectively reduce directory bottlenecks for frequently accessed data?",
+      "answers": {
+        "a": "Increase individual cache sizes",
+        "b": "Implement distributed directory organization with multiple directory nodes",
+        "c": "Reduce the number of processors in the system",
+        "d": "Use slower processors to reduce access frequency"
+      },
+      "explanations": {
+        "a": "Incorrect. While larger caches help with capacity, they don't address directory hotspots for shared data.",
+        "b": "Correct. Distributed directory organization spreads directory load across multiple nodes, reducing hotspots and improving scalability for popular data.",
+        "c": "Incorrect. Reducing processors defeats the purpose of multiprocessor systems.",
+        "d": "Incorrect. Slowing processors reduces performance without solving the fundamental scalability issue."
+      },
+      "correctAnswer": "b",
+      "difficulty": "advanced"
+    }
+  ]
+}
