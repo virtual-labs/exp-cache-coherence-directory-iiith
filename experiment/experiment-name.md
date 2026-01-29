@@ -1,1 +1,1 @@
-## Experiment name
+## Directory-Based Cache Coherence Protocol Simulator

@@ -1,13 +1,551 @@
 <!DOCTYPE html>
-<html>
-<head>
-	<!-- Add CSS at the head of HTML file -->
-    <link rel="stylesheet" href="./css/main.css">
-</head>
-<body>
-		<!-- Your code goes here-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Directory-Based Cache Coherence Simulator</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./css/main.css" />
+  </head>
+  <body>
+    <section class="section">
+      <div class="container">
+        <p class="subtitle has-text-centered">
+          Interactive exploration of distributed cache coherence mechanisms
+        </p>
+      </div>
+    </section>
 
-	<!-- Add JS at the bottom of HTML file --> 
-        <script src="./js/main.js"></script>
-</body>
+    <!-- How to Use This Simulator -->
+    <section class="section pt-4">
+      <div class="container">
+        <div class="box">
+          <h2 class="title is-3 has-text-centered">
+            How to Use This Simulator
+          </h2>
+
+          <div class="columns">
+            <div class="column is-half">
+              <div class="content">
+                <h4 class="subtitle is-5">Protocol States:</h4>
+                <ul>
+                  <li>
+                    <strong>Cache States:</strong> Invalid (I), Shared (S),
+                    Modified (M)
+                  </li>
+                  <li>
+                    <strong>Directory States:</strong> Uncached (U), Shared (S),
+                    Exclusive (E)
+                  </li>
+                  <li>
+                    <strong>Sharer Vector:</strong> Tracks which processors have
+                    copies (e.g., 1100 = P0,P1)
+                  </li>
+                  <li>
+                    <strong>Cache-to-Cache:</strong> Direct data transfer
+                    between processors
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="column is-half">
+              <div class="content">
+                <h4 class="subtitle is-5">Instructions:</h4>
+                <ol>
+                  <li>Select a processor (P0, P1, P2, or P3)</li>
+                  <li>Choose operation type (Read or Write)</li>
+                  <li>Select memory block (A, B, C, or D)</li>
+                  <li>For writes, enter data value (e.g., 0xFF)</li>
+                  <li>
+                    Click "Execute Operation" or use "Step Through" for detailed
+                    view
+                  </li>
+                  <li>
+                    Watch cache states, directory updates, and network messages
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Control Panel -->
+    <section class="section pt-4">
+      <div class="container">
+        <div class="card">
+          <div class="card-header">
+            <p class="card-header-title">
+              <span class="icon"><i class="fas fa-cogs"></i></span>
+              Simulation Controls
+            </p>
+          </div>
+          <div class="card-content">
+            <div class="columns is-multiline">
+              <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                <div class="field">
+                  <label class="label">Processor</label>
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select id="processorSelect">
+                        <option value="0">Processor 0</option>
+                        <option value="1">Processor 1</option>
+                        <option value="2">Processor 2</option>
+                        <option value="3">Processor 3</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                <div class="field">
+                  <label class="label">Operation</label>
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select id="operationSelect">
+                        <option value="read">Read</option>
+                        <option value="write">Write</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                <div class="field">
+                  <label class="label">Memory Block</label>
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select id="addressSelect">
+                        <option value="A">Block A</option>
+                        <option value="B">Block B</option>
+                        <option value="C">Block C</option>
+                        <option value="D">Block D</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                <div class="field">
+                  <label class="label">Data (for writes)</label>
+                  <div class="control">
+                    <input
+                      class="input"
+                      type="text"
+                      id="dataInput"
+                      placeholder="0x00"
+                      maxlength="6"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="buttons is-centered mt-4">
+              <button class="button is-primary is-medium" id="executeBtn">
+                <span class="icon"><i class="fas fa-play"></i></span>
+                <span>Execute Operation</span>
+              </button>
+              <button
+                class="button is-warning is-medium step-mode"
+                id="stepBtn"
+              >
+                <span class="icon"><i class="fas fa-step-forward"></i></span>
+                <span>Step Through</span>
+              </button>
+              <button class="button is-info is-medium" id="autoStepBtn">
+                <span class="icon"><i class="fas fa-play-circle"></i></span>
+                <span>Auto Step</span>
+              </button>
+              <button class="button is-danger is-medium" id="resetBtn">
+                <span class="icon"><i class="fas fa-undo"></i></span>
+                <span>Reset Simulation</span>
+              </button>
+            </div>
+
+            <!-- Step-through controls -->
+            <div
+              class="step-controls mt-3"
+              id="stepControls"
+              style="display: none"
+            >
+              <div class="field is-grouped is-grouped-centered">
+                <div class="control">
+                  <label class="label is-small">Auto-step delay:</label>
+                  <input
+                    type="range"
+                    class="slider"
+                    id="stepSpeed"
+                    min="500"
+                    max="3000"
+                    value="1500"
+                    step="250"
+                  />
+                  <p class="help has-text-centered">
+                    <span id="stepSpeedValue">1.5</span>s per step
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- System State Display -->
+    <section class="section pt-4">
+      <div class="container">
+        <div class="columns">
+          <!-- Processor Caches -->
+          <div class="column is-12-tablet is-8-desktop">
+            <div class="card">
+              <div class="card-header">
+                <p class="card-header-title">
+                  <span class="icon"><i class="fas fa-microchip"></i></span>
+                  Processor Cache States
+                </p>
+              </div>
+              <div class="card-content">
+                <div class="columns is-multiline" id="processorCaches">
+                  <!-- Processor caches will be generated here -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Directory Table -->
+          <div class="column is-12-tablet is-4-desktop">
+            <div class="card">
+              <div class="card-header">
+                <p class="card-header-title">
+                  <span class="icon"><i class="fas fa-database"></i></span>
+                  Directory Table
+                </p>
+              </div>
+              <div class="card-content">
+                <div class="table-container">
+                  <table class="table is-fullwidth is-striped">
+                    <thead>
+                      <tr>
+                        <th>Block</th>
+                        <th>State</th>
+                        <th>Sharers</th>
+                        <th>Owner</th>
+                      </tr>
+                    </thead>
+                    <tbody id="directoryTable">
+                      <!-- Directory entries will be generated here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Network Activity -->
+    <section class="section pt-4">
+      <div class="container">
+        <div class="columns">
+          <!-- Message Flow Visualization -->
+          <div class="column is-12-tablet is-6-desktop">
+            <div class="card">
+              <div class="card-header">
+                <p class="card-header-title">
+                  <span class="icon"><i class="fas fa-network-wired"></i></span>
+                  Network Message Flow
+                </p>
+              </div>
+              <div class="card-content">
+                <div id="networkVisualization" class="network-container">
+                  <!-- Enhanced Network Topology -->
+                  <div class="network-topology">
+                    <!-- Directory Node (Center) -->
+                    <div class="network-node directory-node" id="directoryNode">
+                      <div class="node-icon">
+                        <i class="fas fa-database"></i>
+                      </div>
+                      <div class="node-label">Directory</div>
+                      <div class="node-status" id="directoryStatus">Ready</div>
+                    </div>
+
+                    <!-- Processor Nodes (Around Directory) -->
+                    <div
+                      class="network-node processor-node"
+                      id="processorNode0"
+                      data-processor="0"
+                    >
+                      <div class="node-icon">
+                        <i class="fas fa-microchip"></i>
+                      </div>
+                      <div class="node-label">P0</div>
+                      <div class="node-status" id="p0Status">Idle</div>
+                    </div>
+
+                    <div
+                      class="network-node processor-node"
+                      id="processorNode1"
+                      data-processor="1"
+                    >
+                      <div class="node-icon">
+                        <i class="fas fa-microchip"></i>
+                      </div>
+                      <div class="node-label">P1</div>
+                      <div class="node-status" id="p1Status">Idle</div>
+                    </div>
+
+                    <div
+                      class="network-node processor-node"
+                      id="processorNode2"
+                      data-processor="2"
+                    >
+                      <div class="node-icon">
+                        <i class="fas fa-microchip"></i>
+                      </div>
+                      <div class="node-label">P2</div>
+                      <div class="node-status" id="p2Status">Idle</div>
+                    </div>
+
+                    <div
+                      class="network-node processor-node"
+                      id="processorNode3"
+                      data-processor="3"
+                    >
+                      <div class="node-icon">
+                        <i class="fas fa-microchip"></i>
+                      </div>
+                      <div class="node-label">P3</div>
+                      <div class="node-status" id="p3Status">Idle</div>
+                    </div>
+
+                    <!-- Network Links -->
+                    <svg class="network-links" viewBox="0 0 400 300">
+                      <!-- P0 to Directory -->
+                      <line
+                        class="network-link"
+                        id="link-p0-dir"
+                        x1="100"
+                        y1="75"
+                        x2="200"
+                        y2="150"
+                      />
+                      <!-- P1 to Directory -->
+                      <line
+                        class="network-link"
+                        id="link-p1-dir"
+                        x1="300"
+                        y1="75"
+                        x2="200"
+                        y2="150"
+                      />
+                      <!-- P2 to Directory -->
+                      <line
+                        class="network-link"
+                        id="link-p2-dir"
+                        x1="100"
+                        y1="225"
+                        x2="200"
+                        y2="150"
+                      />
+                      <!-- P3 to Directory -->
+                      <line
+                        class="network-link"
+                        id="link-p3-dir"
+                        x1="300"
+                        y1="225"
+                        x2="200"
+                        y2="150"
+                      />
+
+                      <!-- P2P Links (for cache-to-cache transfers) -->
+                      <line
+                        class="network-link p2p-link"
+                        id="link-p0-p1"
+                        x1="100"
+                        y1="75"
+                        x2="300"
+                        y2="75"
+                      />
+                      <line
+                        class="network-link p2p-link"
+                        id="link-p0-p2"
+                        x1="100"
+                        y1="75"
+                        x2="100"
+                        y2="225"
+                      />
+                      <line
+                        class="network-link p2p-link"
+                        id="link-p0-p3"
+                        x1="100"
+                        y1="75"
+                        x2="300"
+                        y2="225"
+                      />
+                      <line
+                        class="network-link p2p-link"
+                        id="link-p1-p2"
+                        x1="300"
+                        y1="75"
+                        x2="100"
+                        y2="225"
+                      />
+                      <line
+                        class="network-link p2p-link"
+                        id="link-p1-p3"
+                        x1="300"
+                        y1="75"
+                        x2="300"
+                        y2="225"
+                      />
+                      <line
+                        class="network-link p2p-link"
+                        id="link-p2-p3"
+                        x1="100"
+                        y1="225"
+                        x2="300"
+                        y2="225"
+                      />
+                    </svg>
+
+                    <!-- Message Animations -->
+                    <div class="message-overlay" id="messageOverlay">
+                      <!-- Animated message indicators will be added here -->
+                    </div>
+                  </div>
+
+                  <!-- Message Queue -->
+                  <div class="message-queue mt-4">
+                    <h6 class="subtitle is-6">Active Messages:</h6>
+                    <div id="activeMessages" class="message-list">
+                      <p class="has-text-grey-light">No active messages</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Operation Status -->
+          <div class="column is-12-tablet is-6-desktop">
+            <div class="card">
+              <div class="card-header">
+                <p class="card-header-title">
+                  <span class="icon"><i class="fas fa-tasks"></i></span>
+                  Current Operation Status
+                </p>
+              </div>
+              <div class="card-content">
+                <div id="operationStatus" class="content">
+                  <p class="has-text-grey">No operation in progress</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Protocol Log and Performance -->
+    <section class="section pt-4">
+      <div class="container">
+        <div class="columns">
+          <!-- Protocol Message Log -->
+          <div class="column is-12-tablet is-8-desktop">
+            <div class="card">
+              <div class="card-header">
+                <p class="card-header-title">
+                  <span class="icon"><i class="fas fa-list-alt"></i></span>
+                  Protocol Message Log
+                </p>
+                <div class="card-header-icon">
+                  <button class="button is-small is-light" id="clearLogBtn">
+                    <span class="icon"><i class="fas fa-trash"></i></span>
+                    <span>Clear</span>
+                  </button>
+                </div>
+              </div>
+              <div class="card-content">
+                <div class="message-log" id="messageLog">
+                  <!-- Protocol messages will appear here -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Performance Metrics -->
+          <div class="column is-12-tablet is-4-desktop">
+            <div class="card">
+              <div class="card-header">
+                <p class="card-header-title">
+                  <span class="icon"><i class="fas fa-chart-bar"></i></span>
+                  Performance Metrics
+                </p>
+              </div>
+              <div class="card-content">
+                <div id="performanceMetrics">
+                  <!-- Performance counters will be displayed here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Protocol Information Panel -->
+    <section class="section pt-4">
+      <div class="container">
+        <div class="card">
+          <div class="card-header">
+            <p class="card-header-title">
+              <span class="icon"><i class="fas fa-info-circle"></i></span>
+              Protocol Information
+            </p>
+          </div>
+          <div class="card-content">
+            <div class="columns">
+              <div class="column">
+                <h5 class="title is-5">Cache States</h5>
+                <div class="tags">
+                  <span class="tag is-danger">Invalid (I)</span>
+                  <span class="tag is-info">Shared (S)</span>
+                  <span class="tag is-warning">Modified (M)</span>
+                </div>
+              </div>
+              <div class="column">
+                <h5 class="title is-5">Directory States</h5>
+                <div class="tags">
+                  <span class="tag is-light">Uncached (U)</span>
+                  <span class="tag is-info">Shared (S)</span>
+                  <span class="tag is-warning">Exclusive (E)</span>
+                </div>
+              </div>
+              <div class="column">
+                <h5 class="title is-5">Message Types</h5>
+                <div class="tags">
+                  <span class="tag is-primary">Read-Request</span>
+                  <span class="tag is-success">Data-Reply</span>
+                  <span class="tag is-danger">Invalidate</span>
+                  <span class="tag is-warning">Forward-Request</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="./js/main.js"></script>
+  </body>
 </html>
